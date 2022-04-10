@@ -1,3 +1,5 @@
+const sha256 = require("sha256");
+
 function Blockchain() {
   this.chain = [];
   this.pendingTransactions = [];
@@ -30,6 +32,35 @@ Blockchain.prototype.createNewTransaction = (amount, sender, recipient) => {
   this.pendingTransactions.push(newTransaction);
   // Index of block in which this transaction will be added to.
   return this.getLastBlock().index + 1;
+};
+
+Blockchain.prototype.hashBlock = (
+  previousBlockHash,
+  currentBlockData,
+  nonce
+) => {
+  // Stringify might loose its order and data generated might be different when called repeatedly.
+  // This could happen in case of object data
+  const data =
+    previousBlockHash + nonce.toString() + JSON.stringify(currentBlockData);
+  const hash = sha256(data);
+  return hash;
+};
+
+Blockchain.prototype.proofOfWork = (previousBlockHash, currentBlockData) => {
+  /**
+   * Try out different nonce value and call hashBlock method until a
+   * hash stating with four 0's is found. Keeping data and previosBlockHash constant,
+   * this becomes a trial and error method to find a nonce which satisfies the
+   * requirement. Result of proof of work is the nonce value.
+   */
+  let nonce = 0;
+  let hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+  while (hash.substring(0, 4) !== "0000") {
+    nonce++;
+    hash = this.hashBlock(previousBlockHash, currentBlockData, nonce);
+  }
+  return nonce;
 };
 
 module.exports = Blockchain;

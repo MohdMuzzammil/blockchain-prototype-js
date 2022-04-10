@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/MohdMuzzammil/blockchain-prototype-js/issues"
   },
-  "homepage": "https://github.com/MohdMuzzammil/blockchain-prototype-js#readme"
+  "homepage": "https://github.com/MohdMuzzammil/blockchain-prototype-js#readme",
+  "dependencies": {
+    "sha256": "^0.2.0"
+  }
 }
