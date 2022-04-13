@@ -7,7 +7,11 @@ function Blockchain() {
   this.createNewBlock(0, "0", "0");
 }
 
-Blockchain.prototype.createNewBlock = (nonce, previousBlockHash, hash) => {
+Blockchain.prototype.createNewBlock = function (
+  nonce,
+  previousBlockHash,
+  hash
+) {
   const newBlock = {
     index: this.chain.length + 1,
     timestamp: Date.now(),
@@ -21,11 +25,15 @@ Blockchain.prototype.createNewBlock = (nonce, previousBlockHash, hash) => {
   return newBlock;
 };
 
-Blockchain.prototype.getLastBlock = () => {
+Blockchain.prototype.getLastBlock = function () {
   return this.chain[this.chain.length - 1];
 };
 
-Blockchain.prototype.createNewTransaction = (amount, sender, recipient) => {
+Blockchain.prototype.createNewTransaction = function (
+  amount,
+  sender,
+  recipient
+) {
   const newTransaction = {
     amount,
     sender,
@@ -36,11 +44,11 @@ Blockchain.prototype.createNewTransaction = (amount, sender, recipient) => {
   return this.getLastBlock().index + 1;
 };
 
-Blockchain.prototype.hashBlock = (
+Blockchain.prototype.hashBlock = function (
   previousBlockHash,
   currentBlockData,
   nonce
-) => {
+) {
   // Stringify might loose its order and data generated might be different when called repeatedly.
   // This could happen in case of object data
   const data =
@@ -49,7 +57,10 @@ Blockchain.prototype.hashBlock = (
   return hash;
 };
 
-Blockchain.prototype.proofOfWork = (previousBlockHash, currentBlockData) => {
+Blockchain.prototype.proofOfWork = function (
+  previousBlockHash,
+  currentBlockData
+) {
   /**
    * Try out different nonce value and call hashBlock method until a
    * hash stating with four 0's is found. Keeping data and previosBlockHash constant,
