@@ -3,6 +3,9 @@ const app = express();
 const bodyParser = require("body-parser");
 const Blockchain = require("./src/blockchain");
 const uuid = require("uuid").v1;
+const rp = require("request-promise");
+
+const port = process.argv[2];
 
 // Address of current node
 const nodeAddress = uuid().split("-").join("");
@@ -46,6 +49,65 @@ app.get("/mine", (req, res) => {
   res.json({ note: "Block mined successfully", block: newBlock });
 });
 
-app.listen(3000, () => {
-  console.log("Listening on 3000");
+app.post("/register-and-broadcast-node", (req, res) => {
+  const newNodeUrl = req.body.newNodeUrl;
+  if (blockchain.networkNodes.indexOf(newNodeUrl) !== -1)
+    blockchain.networkNodes.push(newNodeUrl);
+  Promise.all(
+    blockchain.networkNodes.map((networkNodeUrl) => {
+      //Call /register-node
+      const requestOptions = {
+        uri: networkNodeUrl + "/register-node",
+        method: "POST",
+        body: {
+          newNodeUrl: newNodeUrl,
+        },
+        json: true,
+      };
+      return rp(requestOptions);
+    })
+  )
+    .then((data) => {
+      const bulkRegisterOptions = {
+        uri: newNodeUrl + "/register-node-bulk",
+        method: "POST",
+        body: {
+          allNetworkNodes: [
+            ...blockchain.networkNodes,
+            blockchain.currentNodeUrl,
+          ],
+        },
+        json: true,
+      };
+      return rp(bulkRegisterOptions);
+    })
+    .then((data) => {
+      res.json({ note: "New node registered" });
+    });
+});
+
+app.post("/register-node", (req, res) => {
+  const newNodeUrl = req.body.newNodeUrl;
+  if (
+    blockchain.networkNodes.indexOf(newNodeUrl) !== -1 && // Not registered yet
+    newNodeUrl !== blockchain.currentNodeUrl // Not current node
+  )
+    blockchain.networkNodes.push(newNodeUrl);
+  res.json({ note: "New node registered" });
+});
+
+app.post("/register-node-bulk", (req, res) => {
+  req.body.allNetworkNodes.forEach((networkNode) => {
+    if (
+      blockchain.networkNodes.indexOf(networkNode) !== -1 &&
+      networkNode !== blockchain.currentNodeUrl
+    ) {
+      blockchain.networkNodes.push(networkNode);
+    }
+  });
+  res.json({ note: "Bulk networks registered" });
+});
+
+app.listen(port, () => {
+  console.log("Listening on ", port);
 });

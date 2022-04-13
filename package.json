@@ -4,7 +4,10 @@
   "description": "Javascript Prototype of Blockchain",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --watch dev -e js",
+    "node_1": "nodemon --watch dev -e js index.js 3001 http://localhost:3001",
+    "node_2": "nodemon --watch dev -e js index.js 3002 http://localhost:3002",
+    "node_3": "nodemon --watch dev -e js index.js 3003 http://localhost:3003",
+    "node_4": "nodemon --watch dev -e js index.js 3004 http://localhost:3004",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,6 +23,8 @@
   "dependencies": {
     "body-parser": "^1.20.0",
     "express": "^4.17.3",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
     "sha256": "^0.2.0",
     "uuid": "^8.3.2"
   },
