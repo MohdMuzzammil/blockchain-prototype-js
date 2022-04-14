@@ -166,6 +166,47 @@ app.post("/register-node-bulk", (req, res) => {
   res.json({ note: "Bulk networks registered" });
 });
 
+app.get("/consensus", (req, res) => {
+  Promise.all(
+    blockchain.networkNodes.map((networkNodeUrl) => {
+      const options = {
+        uri: networkNodeUrl + "/blockchain",
+        method: "GET",
+        json: true,
+      };
+      return rp(options);
+    })
+  ).then((blockchainList) => {
+    let currentChainLength = blockchain.chain.length;
+    let maxChainLength = currentChainLength;
+    let newLongestChain = null;
+    let newPendingTransactions = null;
+    blockchainList.forEach((bc) => {
+      if (bc.chain.length > maxChainLength) {
+        maxChainLength = bc.chain.length;
+        newLongestChain = bc.chain;
+        newPendingTransactions = bc.pendingTransactions;
+      }
+    });
+    if (
+      !newLongestChain ||
+      (newLongestChain && !blockchain.chainIsValid(newLongestChain))
+    ) {
+      res.json({
+        note: "Current chain not replaced",
+        chain: blockchain.chain,
+      });
+    } else if (newLongestChain && blockchain.chainIsValid(newLongestChain)) {
+      blockchain.chain = newLongestChain;
+      blockchain.pendingTransactions = newPendingTransactions;
+      res.json({
+        note: "Current chain updated",
+        chain: blockchain.chain,
+      });
+    }
+  });
+});
+
 app.listen(port, () => {
   console.log("Listening on ", port);
 });
